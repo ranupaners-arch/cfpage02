@@ -1,39 +1,87 @@
-# Cloudflare Workflows Starter Template
+# Cloudflare Workflows Starter (cfpage02)
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/templates/tree/main/workflows-starter-template)
+Demo interaktif yang memperagakan **Cloudflare Workflows**: sebuah alur kerja multi-langkah yang berjalan di backend lalu statusnya ditampilkan secara real-time di UI lewat WebSocket. Ditujukan untuk developer yang ingin belajar/mencoba cara membangun durable workflow (step dengan delay, pause menunggu event, dsb.) di atas Cloudflare Workers.
 
-<!-- dash-content-start -->
+![Screenshot](assets/template-screenshot.png)
 
-A real-time, interactive demonstration of [Cloudflare Workflows](https://developers.cloudflare.com/workflows) with live updates via WebSockets and Durable Objects. This template showcases durable multi-step workflows with time-based delays, event-driven pauses, and real-time status visualization.
+## Fitur Utama
 
-<!-- dash-content-end -->
+- Menjalankan workflow 4 langkah (`process data` → `wait 2 seconds` → `wait for approval` → `final`) menggunakan Cloudflare Workflows (`worker/workflow.ts`).
+- Update status workflow secara real-time ke browser via WebSocket, didukung oleh Durable Object dengan hibernation API (`worker/durable-object.ts`).
+- Step `wait for approval` dapat dipicu dari API (`POST /api/workflow/event/:id`) untuk mensimulasikan persetujuan/event eksternal.
+- Visualisasi diagram alur workflow beserta status tiap step (`src/components/WorkflowDiagram.tsx`).
+- Tampilan kode sumber workflow dengan highlight baris sesuai step yang sedang berjalan (`src/components/CodeDisplay.tsx`).
+- API untuk memulai workflow baru dan mengecek statusnya (`POST /api/workflow/start`, `GET /api/workflow/status/:id`).
 
-![Cloudflare Workflows Starter Template](assets/template-screenshot.png)
+## Tech Stack
 
-## Getting Started
+- **Frontend**: React 19, TypeScript, Tailwind CSS 4, Vite 7
+- **Backend**: Cloudflare Workers, Cloudflare Workflows, Durable Objects (SQLite-backed)
+- **Tooling**: Wrangler, ESLint, Vitest (`@cloudflare/vitest-pool-workers`)
 
-### Installation
+## Cara Menjalankan Lokal
+
+### 1. Instalasi
 
 ```bash
 npm install
 ```
 
-### Development
+### 2. Environment
+
+Proyek ini tidak memerlukan variabel environment (`.env`) untuk berjalan secara lokal — semua binding (Workflow, Durable Object) sudah didefinisikan di `wrangler.jsonc`.
+
+### 3. Menjalankan
 
 ```bash
 npm run dev
 ```
 
-Visit `http://localhost:5173` to see the interactive demo.
+Buka `http://localhost:5173`.
 
-### Deployment
+### 4. Build
+
+```bash
+npm run build
+```
+
+### Skrip lain yang tersedia
+
+- `npm run lint` — menjalankan ESLint
+- `npm run test` — menjalankan test Vitest (termasuk test workflow)
+- `npm run check` — type-check + dry-run deploy Wrangler
+- `npm run cf-typegen` — generate tipe `Env` dari `wrangler.jsonc`
+
+## Struktur Folder
+
+```
+src/
+  components/   Komponen UI (diagram workflow, tampilan kode, dekorasi background)
+  hooks/         Hook React (koneksi WebSocket ke status workflow)
+  App.tsx        Komponen utama aplikasi
+  types.ts       Tipe bersama & definisi langkah workflow
+worker/
+  index.ts         Entry point Worker: routing API & upgrade WebSocket
+  workflow.ts       Definisi Cloudflare Workflow (MyWorkflow)
+  durable-object.ts Durable Object untuk state & broadcast WebSocket
+test/            Test untuk workflow (Vitest)
+assets/          Aset gambar (screenshot)
+wrangler.jsonc   Konfigurasi Cloudflare Workers/Workflows/Durable Objects
+```
+
+## Deploy
+
+Proyek ini di-deploy sebagai Cloudflare Worker (bukan aplikasi mobile), sehingga tidak ada rilis APK. Untuk deploy ke Cloudflare:
 
 ```bash
 npm run deploy
 ```
 
-## Learn More
+Perintah ini menjalankan build lalu `wrangler deploy` sesuai konfigurasi di `wrangler.jsonc`.
 
-- [Cloudflare Workflows Documentation](https://developers.cloudflare.com/workflows)
-- [Durable Objects Documentation](https://developers.cloudflare.com/durable-objects)
-- [Workers Documentation](https://developers.cloudflare.com/workers)
+## Kredit
+
+Dibuat oleh **Ranupane Rimba Argana**, founder [Kukerjain](https://kukerjain.dev).
+
+- 🌐 [kukerjain.dev](https://kukerjain.dev)
+- 👤 [ranupane.kukerjain.dev](https://ranupane.kukerjain.dev)
